@@ -33,16 +33,18 @@ The workflow is the same as [Finetuning with PyTorch](../README.md#finetuning-wi
 
 ```bash
 python3 examples/convert_jax_model_to_pytorch.py \
-    --config_name pi05_libero \
-    --checkpoint_dir /openpi_assets/openpi-assets/checkpoints/pi05_base \
-    --output_path /openpi_assets/pi05_base_pytorch
+    --config_name <config name> \
+    --checkpoint_dir /path/to/jax/base/model \
+    --output_path /path/to/pytorch/base/model
 
-python3 scripts/compute_norm_stats.py --config-name pi05_libero
+python3 scripts/compute_norm_stats.py --config-name <config name>
 
-torchrun --standalone --nnodes=1 --nproc_per_node=8 \
-    scripts/train_pytorch.py pi05_libero --exp_name my_run \
-    --pytorch-weight-path /openpi_assets/pi05_base_pytorch \
-    --num-workers 8
+# single-node training
+torchrun --standalone --nnodes=1 --nproc_per_node=<gpus_per_node> scripts/train_pytorch.py <config_name> --exp_name <run_name> --pytorch-weight-path /path/to/pytorch/base/model --num-workers 8
+
+# multi-node training
+torchrun --nnodes=<num_nodes> --nproc_per_node=<gpus_per_node> --node_rank=<rank_of_node> --master_addr=<master_ip> --master_port=<port> \
+    scripts/train_pytorch.py <config_name> --exp_name=<run_name> --save_interval <interval> --pytorch-weight-path /path/to/pytorch/base/model
 ```
 
 ## How the image differs from the uv setup
